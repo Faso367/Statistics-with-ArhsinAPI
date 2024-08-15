@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="SearchStatistics.css">
+    <!-- <script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js"></script> -->
+    <!-- <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-grid.css"> -->
+    <!-- <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-theme-alpine.css"> -->
+    <script src="./src/ag-grid-community.min.js"></script>
+    <link rel="stylesheet" href="./src/ag-grid.css">
+    <!-- <link rel="stylesheet" href="./src/ag-theme-alpine.css"> -->
+    <link rel="stylesheet" href="./src/ag-theme-quartz.css">
+    
+    <title>Поиск по статистике</title>
+</head>
+<body>
+<div class="wrapper">
+    <div class="attribute-inputs">
+        <div id="registerNumber-wrapper" class="input-wrapper">
+            <label for="registerNumber">Регистрационный номер типа</label>
+            <input class="mainInput" type="text" id="registerNumber" name="registerNumber">
+            <div id="registerNumberList" class="list"></div>
+        </div>
+        <div id="typeName-wrapper" class="input-wrapper">
+            <label for="typeName">Наименование типа</label>
+            <input class="mainInput" type="text" id="typeName" name="typeName">
+            <div id="typeNameList" class="list"></div>
+        </div>
+        <div id="type-wrapper" class="input-wrapper">
+            <label for="type">Тип</label>
+            <input class="mainInput" type="text" id="type" name="type">
+            <div id="typeList" class="list"></div>
+        </div>
+        <div id="modification-wrapper" class="input-wrapper">
+            <label for="modification">Модификация</label>
+            <input class="mainInput" type="text" id="modification" name="modification">
+            <div id="modificationList" class="list"></div>
+        </div>
+        <!-- <div id="year" class="input-wrapper">
+            <label for="year">Год</label>
+            <input type="text" id="year" name="year" required>
+            <div id="yearList" class="list"></div>
+        </div> -->
+    </div>
+    <div class="send-block">
+        <button id="sendParamsButton" onclick="SendData()">Отправить</button>
+    </div>
+</div>
+<div id="myGrid" class="ag-theme-quartz" style="--ag-background-color: #1a1b1a; height: 500px; --ag-foreground-color: white; padding: 10px;"></div>
+<script src="SearchStatistics.js"></script>
+</body>
+</html>
