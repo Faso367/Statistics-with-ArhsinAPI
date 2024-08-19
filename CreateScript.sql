@@ -34,7 +34,6 @@ DECLARE
 	tables_ text[] := ARRAY['"UniquePoveritelOrgs"', '"UniqueTypeNames"', '"UniqueRegisterNumbers"', '"UniqueTypes"', '"UniqueModifications"'];
 	valCols_ text[] := ARRAY['"poveritelOrg"', '"typeName"', '"registerNumber"', '"type"', '"modification"'];
 	idCols_ text[] := ARRAY['"poveritelOrgId"', '"typeNameId"', '"registerNumberId"', '"typeId"', '"modificationId"'];
-    tsvectorsCols_ text[] := ARRAY['"registerNumber"', '"typeName"', '"type"', '"modification"'];
 	length_ int[] := ARRAY[256, 512, 16, 4096, 2048];
 	tb text;
 	vc text;
@@ -56,19 +55,10 @@ FOR i IN 1..5 LOOP
 	tName = substring(tb from 2 for char_length(tb) - 2);
 	vcName = substring(vc from 2 for char_length(vc) - 2);
     icName = substring(ic from 2 for char_length(ic) - 2);
-    
 
-     -- Для некоторых таблиц создаём еще один столбец для gin индекса
-        IF vc = ANY(tsvectorsCols_) THEN
-            EXECUTE format('CREATE TABLE IF NOT EXISTS %s (
-                id integer NOT NULL GENERATED ALWAYS AS IDENTITY, PRIMARY KEY (id),
-                %s character varying(%s) NOT NULL,
-                "%s_tsvector" tsvector)', tb, vc, l, vcName);
-        ELSE
-            EXECUTE format('CREATE TABLE IF NOT EXISTS %s (
-                id integer NOT NULL GENERATED ALWAYS AS IDENTITY, PRIMARY KEY (id),
-                %s character varying(%s) NOT NULL)', tb, vc, l);
-        END IF;
+    EXECUTE format('CREATE TABLE IF NOT EXISTS %s (
+        id integer NOT NULL GENERATED ALWAYS AS IDENTITY, PRIMARY KEY (id),
+        %s character varying(%s) NOT NULL)', tb, vc, l);
     IF i = 1 THEN
         -- Создаем партиции с индексами 
         FOR year in 2019..cur_year LOOP

@@ -137,6 +137,41 @@ class ArshinDataDownloader:
         self.logger.addHandler(self.console_handler)
 
 
+    # def download_file_with_retry(self, url, local_filename, max_retries=10, retry_delay=10, chunk_size=1024):
+    #     # Проверяем наличие файла и его размер
+    #     offset = os.path.getsize(local_filename) if os.path.exists(local_filename) else 0
+
+    #     for attempt in range(max_retries):
+    #         try:
+    #             headers = {'Range': f'bytes={offset}-'}
+    #             response = requests.get(url, headers=headers, stream=True)
+    #             response.raise_for_status()  # Поднять исключение для кода статуса HTTP 4xx/5xx
+                
+    #             total_size = int(response.headers.get('content-length', 0)) + offset
+
+    #             with open(local_filename, 'ab') as f:
+    #                 pbar = tqdm(total=total_size, initial=offset, unit='B', unit_scale=True, desc=local_filename)
+    #                 for chunk in response.iter_content(chunk_size=chunk_size):
+    #                     if chunk:
+    #                         f.write(chunk)
+    #                         pbar.update(len(chunk))
+    #                 pbar.close()
+                
+    #             # Проверка, завершена ли загрузка
+    #             if os.path.getsize(local_filename) >= total_size:
+    #                 return True
+    #             else:
+    #                 self.logger.info(f"Скачивание не завершено, продолжение с {os.path.getsize(local_filename)}...")
+    #                 offset = os.path.getsize(local_filename)  # обновить смещение
+
+    #         except requests.exceptions.RequestException as e:
+    #             self.logger.error(f"Произошла ошибка: {e}. Повторение скачивания через {retry_delay} секунд...")
+    #             time.sleep(retry_delay)
+    #             offset = os.path.getsize(local_filename)  # обновить смещение
+
+    #     return False
+
+
     def download_file_with_retry(self, url, local_filename, max_retries=10, retry_delay=10, chunk_size=1024):
         # Проверяем наличие файла и его размер
         offset = os.path.getsize(local_filename) if os.path.exists(local_filename) else 0
@@ -167,7 +202,6 @@ class ArshinDataDownloader:
             except requests.exceptions.RequestException as e:
                 self.logger.error(f"Произошла ошибка: {e}. Повторение скачивания через {retry_delay} секунд...")
                 time.sleep(retry_delay)
-                offset = os.path.getsize(local_filename)  # обновить смещение
 
         return False
 
@@ -193,12 +227,18 @@ class ArshinDataDownloader:
         for chunk in df:
             
             chunk = chunk.drop(columns=['Number', 'Date1', 'Date2', 'Pusto', 'rabbish'])
-            search = lambda x: x if re.search(r"\d{4}-\d{2}-\d{2}", str(x)) else 'not found'
+            # search = lambda x: x if re.search(r"\d{4}-\d{2}-\d{2}", str(x)) else 'not found'
+            search = lambda x: x if re.search(r"\d{4}-\d{2}-\d{2}", str(x)) or re.search(r"\d{4},\d{2},\d{2}", str(x)) \
+                 or re.search(r"\d{4}.\d{2}.\d{2}", str(x)) or re.search(r"\d{4}:\d{2}:\d{2}", str(x)) or re.search(r"\d{4};\d{2};\d{2}", str(x)) else 'not found'
 
             chunk['poverkaDate'] = chunk['poverkaDate'].map(search)
             chunk['konecDate'] = chunk['konecDate'].map(search)
             chunk = chunk.drop(chunk.query('poverkaDate == "not found"').index)
             chunk = chunk.drop(chunk.query('konecDate == "not found"').index)
+
+            chunk['poverkaDate'].replace(to_replace=['.', ',', ':', ';'], value='-')
+            chunk['konecDate'].replace(to_replace=['.', ',', ':', ';'], value='-')
+            
 
             allColumns = ['poveritelOrg', 'registerNumber', 'typeName', 'type', 'modification',
             'serialNumber', 'poverkaDate', 'konecDate', 'svidetelstvoNumber', 'isPrigodno', 'vri_id']
@@ -218,12 +258,20 @@ class ArshinDataDownloader:
 
                 # Определяем отсутствующие строки
                 merged_data = new.merge(old, on=col, how='left', indicator=True)
+                for c in merged_data:
+                    print(c)
+                print('---------------------------')
                 missing_data = merged_data[merged_data['_merge'] == 'left_only'].drop(columns=['_merge'])
+                for c in missing_data:
+                    print(c)
+                print('---------------------------')
                 unique_missing_data = missing_data.drop_duplicates(subset=col)
 
                 # Убираем все строки с нулевыми значениями
                 unique_missing_data = unique_missing_data.dropna()
-                
+                for c in unique_missing_data:
+                    print(c)
+                print('---------------------------')
                 if not unique_missing_data.empty:
                     # Добавляем в столбец categoryName первое слово из строки typeName (для каждой строки typeName)
                     #if table == 'UniqueTypeNames':
@@ -305,12 +353,14 @@ class ArshinDataDownloader:
         return hash_md5.hexdigest()
 
 
-    # def is_folder_empty(self, folder_path):
-    #     folder = Path(folder_path)
-    #     # Проверяем, содержит ли папка файлы
-    #     return not any(folder.iterdir())
+    def is_folder_empty(self, folder_path):
+        folder = Path(folder_path)
+        # Проверяем, содержит ли папка файлы
+        return not any(folder.iterdir())
 
     
+    emptyFolderWasFind = False
+
     def extract_and_add_to_db_old_files(self, rootPath):
         """ Разархивирует все вложенные архивы, добавляет в БД и удаляет все вложенные в них файлы"""
         for z, dirs, files in os.walk(rootPath):
@@ -332,16 +382,15 @@ class ArshinDataDownloader:
                         os.remove(fileSpec)
                     self.extract_and_add_to_db_old_files(z)
             else:
-                # Удаляем пустые папки внутри пустого родительского директория
                 for dir in dirs:
-                    os.rmdir(os.path.join(z, dir))
-                # Удаляем пустой родительский директорий
-                os.rmdir(rootPath)
-                return 0
+                    if (self.is_folder_empty(os.path.join(z, dir)) == True):
+                        os.rmdir(os.path.join(z, dir))
+                        self.extract_and_add_to_db_old_files(rootPath)
+
+                
 
     def __add_old_data(self, responseData):
         '''Добавляет в БД все вложенные в архив файлы и удаляет'''
-
 
         # Запрос для получения содержимого файла
         newFileName = responseData['snapshots'][-1]['relativeUri']
@@ -359,8 +408,12 @@ class ArshinDataDownloader:
             
             self.rootPath = downloadedFolderPath
             self.extract_and_add_to_db_old_files(self.rootPath)
+            os.rmdir(self.rootPath)
         else:
             self.logger.info(f'Файл {newFileName} не был скачан')
+
+        # self.rootPath = 'C:\\Users\\LIKORIS001\\Desktop\\NewCreateScript\\poverki.snapshot.20240801.csv'
+        # self.extract_and_add_to_db_old_files(self.rootPath)
 
 
     def get_new_file_names_and_identifiers(self, responseData):
@@ -426,7 +479,8 @@ class ArshinDataDownloader:
     def Main(self):
 
         #downloadOldData = int(input('Если хотите скачать даные за прошлые месяца, введите 1, иначе 0: '))
-        downloadOldData = 0
+        downloadOldData = 2
+        #for downloadOldData in range():
         response = requests.get(self.__startUrl + 'manifest.json')
 
         self.logger.info(f"Статус код ответа от Аршин: {response.status_code}")

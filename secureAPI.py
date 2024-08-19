@@ -297,10 +297,12 @@ def validation(paramsAndValues):
 
 correctStatisticsParams = ['type', 'modification', 'typeName', 'year', 'registerNumber']
 
+#@app.route('/imreciseSearch', methods=['POST', 'GET'])
 @app.route('/imreciseSearch', methods=['POST', 'GET'])
 def imreciseSearch():
     paramAndValue = request.json
     #validParams = dict()
+    print('\nHello')
 
     #return jsonify({'typeName': ['HELLO', 'BYE']})
 
@@ -851,4 +853,5 @@ def try_to_int(val):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    #app.run(debug=True)
+    app.run(debug=True, host="192.168.0.11", port=5000)

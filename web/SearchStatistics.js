@@ -22,7 +22,7 @@ const gridDiv = document.querySelector('#myGrid');
 
 function sendToAPI(inputData) {
     console.log(inputData);
-    fetch('http://127.0.0.1:5000/statistics', {
+    fetch('http://192.168.0.11:5000/statistics', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -62,7 +62,7 @@ function sendToAPIparam(inputData, list) {
     //console.log(777)
     //console.log(inputData);
     console.log(inputData);
-    fetch('http://127.0.0.1:5000/imreciseSearch', {
+    fetch('http://192.168.0.11:5000/imreciseSearch', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
