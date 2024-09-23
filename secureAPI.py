@@ -1,6 +1,6 @@
 #from flask import Flask, request, jsonify
 from datetime import datetime
-from sqlalchemy import Column, Integer, BigInteger, VARCHAR, Boolean, SmallInteger, Date, create_engine, and_, or_,desc, select, FromGrouping, alias
+from sqlalchemy import Column, Integer, BigInteger, VARCHAR, Boolean, SmallInteger, Date, create_engine, and_, or_,desc, select, FromGrouping, alias, TEXT
 from sqlalchemy.schema import ForeignKey
 from sqlalchemy.orm import sessionmaker, declarative_base, class_mapper, aliased
 import logging, os
@@ -65,30 +65,101 @@ Base = declarative_base()
 # ----------------------- Модели базы данных
 
 # УНИКАЛЬНЫЕ ТАБЛИЦЫ --------------------
+# class UniquePoveritelOrgs(Base):
+# 	__tablename__ = 'UniquePoveritelOrgs'
+# 	id = Column(BigInteger(), primary_key=True)
+# 	poveritelOrg = Column(VARCHAR(256))
+
+# class UniqueTypeNames(Base):
+#     __tablename__ = 'UniqueTypeNames'
+#     id = Column(BigInteger(), primary_key=True)
+#     typeName = Column(VARCHAR(512))
+
+# class UniqueRegisterNumbers(Base):
+# 	__tablename__ = 'UniqueRegisterNumbers'
+# 	id = Column(BigInteger(), primary_key=True)
+# 	registerNumber = Column(VARCHAR(16))
+
+# class UniqueTypes(Base):
+#     __tablename__ = 'UniqueTypes'
+#     id = Column(BigInteger(), primary_key=True)
+#     type = Column(VARCHAR(4096))
+     
+# class UniqueModifications(Base):
+#     __tablename__ = 'UniqueModifications'
+#     id = Column(BigInteger(), primary_key=True)
+#     modification = Column(VARCHAR(2048))
+#     # modification_tsvector = Column(TSVECTOR())
+# # --------------------------------------
+
+# # СТАТИСТИКА ---------------------------
+# class ModificationStatistics(Base):
+#     __tablename__ = 'ModificationStatistics'
+#     id = Column(BigInteger(), primary_key=True)
+#     modification = Column(VARCHAR(2048))
+
+
+# class TypeStatistics(Base):
+#     __tablename__ = 'TypeStatistics'
+#     id = Column(BigInteger(), primary_key=True)
+#     type = Column(VARCHAR(4096))
+
+
+# class RegisterNumberStatistics(Base):
+# 	__tablename__ = 'RegisterNumberStatistics'
+# 	id = Column(BigInteger(), primary_key=True)
+# 	registerNumber = Column(VARCHAR(16))
+
+
+# class TypeNameStatistics(Base):
+#     __tablename__ = 'TypeNameStatistics'
+#     id = Column(BigInteger(), primary_key=True)
+#     typeName = Column(VARCHAR(512))
+
+# # -------------------------------
+
+
+
+# class EquipmentInfoPartitioned(Base):
+#     __tablename__ = 'EquipmentInfoPartitioned'
+#     id = Column(BigInteger(), primary_key=True)
+#     serialNumber = Column(VARCHAR(256))
+#     svidetelstvoNumber = Column(VARCHAR(256))
+#     poverkaDate = Column(Date())
+#     konecDate = Column(Date())
+#     vri_id = Column(BigInteger())
+#     isPrigodno = Column(Boolean())
+#     poveritelOrgId = Column(Integer(), ForeignKey('UniquePoveritelOrgs.id'))
+#     typeNameId = Column(Integer(), ForeignKey('UniqueTypeNames.id'))
+#     registerNumberId = Column(Integer(), ForeignKey('UniqueRegisterNumbers.id'))
+#     typeId = Column(Integer(), ForeignKey('UniqueTypes.id'))
+#     modificationId = Column(Integer(), ForeignKey('UniqueModifications.id'))
+#     year = Column(SmallInteger())
+
 class UniquePoveritelOrgs(Base):
 	__tablename__ = 'UniquePoveritelOrgs'
 	id = Column(BigInteger(), primary_key=True)
-	poveritelOrg = Column(VARCHAR(256))
+	poveritelOrg = Column(TEXT())
 
 class UniqueTypeNames(Base):
     __tablename__ = 'UniqueTypeNames'
     id = Column(BigInteger(), primary_key=True)
-    typeName = Column(VARCHAR(512))
+    typeName = Column(TEXT())
 
 class UniqueRegisterNumbers(Base):
 	__tablename__ = 'UniqueRegisterNumbers'
 	id = Column(BigInteger(), primary_key=True)
-	registerNumber = Column(VARCHAR(16))
+	registerNumber = Column(TEXT())
 
 class UniqueTypes(Base):
     __tablename__ = 'UniqueTypes'
     id = Column(BigInteger(), primary_key=True)
-    type = Column(VARCHAR(4096))
+    type = Column(TEXT())
      
 class UniqueModifications(Base):
     __tablename__ = 'UniqueModifications'
     id = Column(BigInteger(), primary_key=True)
-    modification = Column(VARCHAR(2048))
+    modification = Column(TEXT())
     # modification_tsvector = Column(TSVECTOR())
 # --------------------------------------
 
@@ -96,25 +167,25 @@ class UniqueModifications(Base):
 class ModificationStatistics(Base):
     __tablename__ = 'ModificationStatistics'
     id = Column(BigInteger(), primary_key=True)
-    modification = Column(VARCHAR(2048))
+    modification = Column(TEXT())
 
 
 class TypeStatistics(Base):
     __tablename__ = 'TypeStatistics'
     id = Column(BigInteger(), primary_key=True)
-    type = Column(VARCHAR(4096))
+    type = Column(TEXT())
 
 
 class RegisterNumberStatistics(Base):
 	__tablename__ = 'RegisterNumberStatistics'
 	id = Column(BigInteger(), primary_key=True)
-	registerNumber = Column(VARCHAR(16))
+	registerNumber = Column(TEXT())
 
 
 class TypeNameStatistics(Base):
     __tablename__ = 'TypeNameStatistics'
     id = Column(BigInteger(), primary_key=True)
-    typeName = Column(VARCHAR(512))
+    typeName = Column(TEXT())
 
 # -------------------------------
 
@@ -123,8 +194,8 @@ class TypeNameStatistics(Base):
 class EquipmentInfoPartitioned(Base):
     __tablename__ = 'EquipmentInfoPartitioned'
     id = Column(BigInteger(), primary_key=True)
-    serialNumber = Column(VARCHAR(256))
-    svidetelstvoNumber = Column(VARCHAR(256))
+    serialNumber = Column(TEXT())
+    svidetelstvoNumber = Column(TEXT())
     poverkaDate = Column(Date())
     konecDate = Column(Date())
     vri_id = Column(BigInteger())
@@ -136,13 +207,12 @@ class EquipmentInfoPartitioned(Base):
     modificationId = Column(Integer(), ForeignKey('UniqueModifications.id'))
     year = Column(SmallInteger())
 
-
 # Будем создавать партиции с такими полями
 def create_base_attributes():
     return {
     'id': Column(BigInteger(), primary_key=True),
-    'serialNumber': Column(VARCHAR(256)),
-    'svidetelstvoNumber': Column(VARCHAR(256)),
+    'serialNumber': Column(TEXT()),
+    'svidetelstvoNumber': Column(TEXT()),
     'poverkaDate': Column(Date()),
     'konecDate': Column(Date()),
     'vri_id': Column(BigInteger()),
@@ -187,37 +257,37 @@ file_handler.setFormatter(formatter)
 # Добавление обработчиков к логгеру
 logger.addHandler(file_handler)
 
-def token_required(func):
-    '''Проводит аутентификацию на основе JWT токена'''
-    @wraps(func)
-    def decorated(*args, **kwargs):
-        # Получаем токен из HTTP заголовка
-        token = request.headers.get('Authorization')
-        # Если токен не найден
-        if not token:
-            return jsonify({'message': 'Токен был утерян или время его существования закончилось'}), 401
-        try:
-            # Декодируем токен
-            data = jwt.decode(token.split(" ")[1], SECRET_KEY, algorithms=["HS256"])
-        except Exception as e:
-            logger.error(f'Ошибка: {e}')
-            return jsonify({'message': 'Неверный токен', 'error': str(e)}), 403
+# def token_required(func):
+#     '''Проводит аутентификацию на основе JWT токена'''
+#     @wraps(func)
+#     def decorated(*args, **kwargs):
+#         # Получаем токен из HTTP заголовка
+#         token = request.headers.get('Authorization')
+#         # Если токен не найден
+#         if not token:
+#             return jsonify({'message': 'Токен был утерян или время его существования закончилось'}), 401
+#         try:
+#             # Декодируем токен
+#             data = jwt.decode(token.split(" ")[1], SECRET_KEY, algorithms=["HS256"])
+#         except Exception as e:
+#             logger.error(f'Ошибка: {e}')
+#             return jsonify({'message': 'Неверный токен', 'error': str(e)}), 403
 
-        return func(*args, **kwargs)
-    return decorated
+#         return func(*args, **kwargs)
+#     return decorated
 
 
-#@app.route('/login', methods=['POST'])
-#def login():
-    '''Отвечает за получение пользователем JWT токена по его ключу'''
-    auth = request.form
-    # Если передан параметр key и он принадлежит конкретному пользователю
-    if auth.get('key') == CLIENT_KEY:
-        # Генерируем токен, он существует 1 день
-        token = jwt.encode({'user': auth.get('username'), 'exp': datetime.utcnow() + timedelta(days=1)}, SECRET_KEY, algorithm='HS256')
-        # Возвращаем пользователю токен
-        return jsonify({'token': token})
-    return make_response('Ваш ключ недействителен', 403, {'WWW-Authenticate': 'Basic realm="Login required!"'})
+# @app.route('/login', methods=['POST'])
+# def login():
+#     '''Отвечает за получение пользователем JWT токена по его ключу'''
+#     auth = request.form
+#     # Если передан параметр key и он принадлежит конкретному пользователю
+#     if auth.get('key') == CLIENT_KEY:
+#         # Генерируем токен, он существует 1 день
+#         token = jwt.encode({'user': auth.get('username'), 'exp': datetime.utcnow() + timedelta(days=1)}, SECRET_KEY, algorithm='HS256')
+#         # Возвращаем пользователю токен
+#         return jsonify({'token': token})
+#     return make_response('Ваш ключ недействителен', 403, {'WWW-Authenticate': 'Basic realm="Login required!"'})
 
 
 impreciseSearchParams = ['year', 'rows', 'start', 'sort']
@@ -297,12 +367,10 @@ def validation(paramsAndValues):
 
 correctStatisticsParams = ['type', 'modification', 'typeName', 'year', 'registerNumber']
 
-#@app.route('/imreciseSearch', methods=['POST', 'GET'])
 @app.route('/imreciseSearch', methods=['POST', 'GET'])
 def imreciseSearch():
     paramAndValue = request.json
     #validParams = dict()
-    print('\nHello')
 
     #return jsonify({'typeName': ['HELLO', 'BYE']})
 
@@ -853,5 +921,4 @@ def try_to_int(val):
 
 
 if __name__ == "__main__":
-    #app.run(debug=True)
-    app.run(debug=True, host="192.168.0.11", port=5000)
+    app.run(debug=True)
