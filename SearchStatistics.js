@@ -15,7 +15,7 @@ function sendToAPI(inputData) {
     document.getElementById('loading').style.display = 'block';
     console.log('do block')
 
-    fetch('http://127.0.0.1:8000/statistics', {
+    fetch('https://192.168.0.9:443/statistics', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -41,10 +41,10 @@ function sendToAPI(inputData) {
 
 function SendData() {
     const inputData = {
-        registerNumber: document.getElementById('registerNumber').value,
-        typeName: document.getElementById('typeName').value,
-        type: document.getElementById('type').value,
-        modification: document.getElementById('modification').value
+        mit_number: document.getElementById('mit_number').value,
+        mit_title: document.getElementById('mit_title').value,
+        mit_notation: document.getElementById('mit_notation').value,
+        mi_modification: document.getElementById('mi_modification').value
     };
 
     // Очищаем таблицу перед отправкой данных
@@ -58,7 +58,7 @@ function SendData() {
 
 function sendToAPIparam(inputData, list) {
     //fetch('http://192.168.56.1:5000/imreciseSearch', {
-    fetch('http://127.0.0.1:8000/imreciseSearch', {
+    fetch('https://192.168.0.9:443/imreciseSearch', {
         //fetch('http://192.168.0.16:80/imreciseSearch', {
         method: 'POST',
         headers: {
